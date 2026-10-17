@@ -8,6 +8,8 @@ public sealed record LicenseNotice(string Name, string License, string Text);
 public static class AboutInfo
 {
     private static readonly Assembly Assembly = typeof(AboutInfo).Assembly;
+    public static string Name => Assembly.GetCustomAttribute<AssemblyProductAttribute>()!.Product;
+    public static string Developer => Assembly.GetCustomAttribute<AssemblyCompanyAttribute>()!.Company;
     public static string Version => Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
         ?? Assembly.GetName().Version?.ToString() ?? "未知版本";
 
@@ -21,7 +23,7 @@ public static class AboutInfo
 
     public static IReadOnlyList<LicenseNotice> Licenses { get; } =
     [
-        new("纯K助手", "MIT", Resource("LICENSE")),
+        new(Name, "MIT", Resource("LICENSE")),
         new("ZXing.Net", "Apache-2.0", "Copyright (c) Michael Jahn and ZXing authors.\n\n" + Resource("Apache-2.0.txt")),
         new(".NET / WPF", "MIT / Third-party notices", Resource("Runtime-LICENSE.txt") + "\n\n" + Resource("Runtime-NOTICES.txt") + "\n\n" + Resource("WPF-LICENSE.txt")),
         new("Microsoft.Windows.SDK.NET.Ref", "Windows SDK License", "Microsoft Corporation\nhttps://aka.ms/WinSDKLicenseURL"),

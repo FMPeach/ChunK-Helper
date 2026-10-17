@@ -49,6 +49,9 @@ dotnet run --project src/PureKBridge.App -c Debug -p:Platform=x64
 .\tools\publish-windows.ps1
 ```
 
+应用名称、版本和开发者统一在 [`config/package.json`](config/package.json) 中修改，直接
+`dotnet run` 和发布都会读取这份配置。临时发布其他版本可用 `-Version '0.2.0'`。
+
 默认输出到 `artifacts/PureKHelper-win-x64/`，包含助手与运行时；版本和许可证在程序的“关于”中查看。需要独立单文件时可加 `-SingleFile`；与 Kirakara 联动时，将 App 本机配置中的 `windows.chunkHelperDirectory` 指向这个发布目录即可。
 
 运行回归检查：
@@ -61,4 +64,4 @@ dotnet run --project tests/PureKBridge.Tests -c Release -p:Platform=x64
 
 ## LICENSE
 
-ChunK Helper 自有源代码采用 [MIT License](LICENSE)。ZXing.Net、.NET 及其他随附组件保留各自上游许可证，见 [第三方组件说明](THIRD_PARTY_NOTICES.md)。
+ChunK Helper 自有源代码采用 [MIT License](LICENSE)。第三方组件见 [许可证列表](THIRD_PARTY_NOTICES.md)，也可从程序的“关于”查看。

@@ -91,7 +91,7 @@ internal static class Program
         Check(AboutInfo.Licenses.Count == 4 && AboutInfo.Licenses[1].Text.Contains("TERMS AND CONDITIONS") &&
             AboutInfo.Licenses[2].Text.Contains("License notice for"), "第三方许可正文内嵌且离线可读");
         var about = new PureKBridge.App.AboutWindow();
-        Check(about.Title == "关于纯K助手" && Equals(about.DataContext, AboutInfo.Version), "简洁关于窗口与实际版本绑定");
+        Check(about.Title == "关于" + AboutInfo.Name && Equals(about.DataContext, AboutInfo.Version), "简洁关于窗口与实际版本绑定");
         about.Close();
         Directory.CreateDirectory(Artifacts);
         var raw = Qr();

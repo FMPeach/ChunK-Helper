@@ -1,9 +1,11 @@
 <Window x:Class="PureKBridge.App.AboutWindow"
  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
- Title="关于纯K助手" Width="440" Height="260" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+ xmlns:info="clr-namespace:PureKBridge.App.Services"
+ Title="关于纯K助手" Width="440" Height="280" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
  <StackPanel Margin="26">
-  <TextBlock Text="纯K助手" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,22" />
+  <TextBlock Text="{x:Static info:AboutInfo.Name}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,8" />
+  <TextBlock Text="{x:Static info:AboutInfo.Developer}" Foreground="#656565" Margin="0,0,0,22" />
   <Grid Margin="0,0,0,16">
    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
    <TextBlock Text="版本" />

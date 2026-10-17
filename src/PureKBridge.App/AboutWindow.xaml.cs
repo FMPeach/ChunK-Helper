@@ -9,6 +9,7 @@ public partial class AboutWindow : Window
     public AboutWindow()
     {
         InitializeComponent();
+        Title = "关于" + AboutInfo.Name;
         DataContext = AboutInfo.Version;
     }
 
