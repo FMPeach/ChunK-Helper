@@ -1,2 +1,62 @@
-# ChunK-Helper
-一个辅助Windows连接纯K DLNA投屏的辅助工具，Vibe-Coding 开发
+# ChunK Helper
+
+面向 Windows 的纯 K 房间投屏连接助手。扫描房间二维码、完成官方授权后，将当前房台发布为可发现的 DLNA 设备，方便在 Kirakara 等投屏应用中连接。
+
+## 功能特性
+
+- **扫码识别房间** — 支持摄像头扫码，也可以导入 PNG、JPG、JPEG、BMP 图片。
+- **授权引导** — 保留二维码中的官方授权链接，方便在电脑微信中打开；已授权的设备可直接继续。
+- **设备发现辅助** — 登记本机地址并发送标准 SSDP 公告，不需要扫描网段或手工猜设备端口。
+- **连接状态检查** — 显示房间、设备及本机地址，支持断开、重新连接和重新识别。
+- **播放保持直连** — 控制请求和媒体流仍由投屏应用直接发给房台，助手不转码、不转发视频。
+
+## 使用方式
+
+### 直接运行
+
+在 [Releases](https://github.com/FMPeach/ChunK-Helper/releases) 下载 Windows x64 版本，解压后运行 `ChunK Helper.exe`。自包含发行包不需要另装 .NET；如果下载的是多文件包，请保留 EXE 旁边的文件。
+
+1. 连接到能够访问房台的网络，扫描点歌屏上的投屏二维码，或导入二维码图片。
+2. 按提示完成官方授权；授权本身由官方页面处理，助手不会代为登录微信。
+3. 点击连接，然后回到 Kirakara 等投屏应用刷新设备列表，选择当前房间。
+4. 使用结束后点击断开，或正常退出助手。
+
+请使用自己有权连接的房间。不同门店的设备、网络及授权方式可能不同；设备能被发现与能正常播放是两项检查。
+
+### 在 Kirakara 中使用
+
+[Kirakara-App](https://github.com/FMPeach/Kirakara-App) 的无线投屏面板提供“纯K助手”入口。随 App 分发时，助手放在 `tools/ChunKHelper/`；点击按钮即可启动，连接完成后再手动刷新投屏设备。
+
+## 开发环境
+
+- Windows 10 2004 或更新版本，x64
+- .NET 10 SDK
+- Git，以及可选的 Visual Studio / VS Code
+
+### 从源码运行
+
+```powershell
+git clone https://github.com/FMPeach/ChunK-Helper.git
+cd ChunK-Helper
+dotnet run --project src/PureKBridge.App -c Debug -p:Platform=x64
+```
+
+### 构建发行包
+
+```powershell
+.\tools\publish-windows.ps1
+```
+
+默认输出到 `artifacts/ChunKHelper-win-x64/`，包含助手、运行时和第三方声明。需要独立单文件时可加 `-SingleFile`；与 Kirakara 联动时，将 App 本机配置中的 `windows.chunkHelperDirectory` 指向这个发布目录即可，不需要改动助手的开发方式。
+
+运行回归检查：
+
+```powershell
+dotnet run --project tests/PureKBridge.Tests -c Release -p:Platform=x64
+```
+
+更多说明见 [开发与测试](docs/开发与测试.md)。
+
+## LICENSE
+
+ChunK Helper 自有源代码采用 [MIT License](LICENSE)。ZXing.Net、.NET 及其他随附组件保留各自上游许可证，见 [第三方组件说明](THIRD_PARTY_NOTICES.md)。

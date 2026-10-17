@@ -1,0 +1,18 @@
+ChunK Helper：Windows 原生发现 A/B 诊断（不是正式程序）
+
+1. 把整个 ZIP 复制到 Windows 虚拟机并解压，四个文件放在同一目录。
+2. 等宿主机上的操作者确认 OBSERVER READY，再在虚拟机打开 PowerShell，进入解压目录。
+3. 运行：
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run-vm-discovery-test.ps1
+4. 约 40 秒完成，将同目录生成的 vm-result.log 发回来。
+
+无需管理员权限，无需安装 Python/.NET，不修改防火墙、网络、服务或注册表。
+如果 Windows 弹出网络访问提示，需要你手动决定是否允许；工具不会代操作。
+若提示虚拟机地址不符，把当前虚拟机 IPv4 发回来即可，不要修改网络设置。
+
+A：虚拟机公告，LOCATION 指向宿主机 HTTP。
+B：同一虚拟机公告，LOCATION 指向虚拟机自身 HTTP。
+同一 UDN、XML 字节、发送 socket/端口、通知类型及头字段，只改变 LOCATION 的主机地址。
+49152 为 HTTP 测试端口，49153 只作独立到包标记和组播副本；不占用 SSDP 的 1900 接收端口。
+最开始 UA 为 ChunKABGuestPreflight/ChunKABConnectivityProbe 的 HTTP 是主动连通性检查，
+不是 Windows UPnP 自动发现；判断时需看 Microsoft-Windows UPnP 请求和 DeviceAdded。

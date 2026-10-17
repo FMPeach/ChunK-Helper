@@ -1,0 +1,25 @@
+<UserControl x:Class="PureKBridge.App.Views.WechatView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <StackPanel>
+  <TextBlock Text="2. 完成微信授权" Style="{StaticResource ViewTitle}" />
+  <TextBlock Text="如需官方授权，请复制下方链接，发送到电脑微信聊天窗口（例如“文件传输助手”），并在微信内置浏览器中打开。已授权的设备可直接确认继续，本程序不检查微信登录状态。" Style="{StaticResource Description}" />
+  <Border Style="{StaticResource InfoPanel}">
+   <StackPanel>
+    <TextBlock Text="官方投屏授权链接" FontWeight="SemiBold" Margin="0,0,0,12" />
+    <Grid>
+     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+     <TextBox Text="{Binding AuthorizationUrl, Mode=OneWay}" IsReadOnly="True" Margin="0,0,10,0" AutomationProperties.Name="官方投屏授权链接" />
+     <Button Grid.Column="1" Content="{Binding CopyLabel}" Command="{Binding CopyLinkCommand}" Style="{StaticResource PrimaryButton}" Margin="0" />
+    </Grid>
+    <TextBlock Text="复制后，请在电脑微信中打开；不要使用普通浏览器。" Foreground="#777777" FontSize="12" Margin="0,12,0,0" />
+   </StackPanel>
+  </Border>
+  <TextBlock Style="{StaticResource Description}" Margin="0,0,0,24"><Run Text="1. 将链接粘贴到电脑微信聊天窗口。" /><LineBreak />
+   <Run Text="2. 在微信内打开，按页面提示登录并同意投屏条款。" /><LineBreak /><Run Text="3. 完成后返回此窗口，点击下方按钮继续。" />
+  </TextBlock>
+  <StackPanel Orientation="Horizontal">
+   <Button Content="我已完成微信授权" Command="{Binding ConfirmWechatCommand}" Style="{StaticResource PrimaryButton}" />
+   <Button Content="返回上一步" Command="{Binding BackCommand}" />
+  </StackPanel>
+ </StackPanel>
+</UserControl>

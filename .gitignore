@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/logs/
+artifacts/
+.vs/
+*.user
+*.suo
+/local-notes/
+/docs/PROMPT_2.md
+/docs/PureK_*.md
+/docs/本机设备发布兼容性.md

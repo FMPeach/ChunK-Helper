@@ -1,0 +1,40 @@
+<UserControl x:Class="PureKBridge.App.Views.ConnectedView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <StackPanel>
+  <DockPanel Margin="0,0,0,18">
+   <Border Width="34" Height="34" Background="#E0F3E3" CornerRadius="17" DockPanel.Dock="Left" Margin="0,0,12,0" VerticalAlignment="Top">
+    <TextBlock Text="✓" Foreground="#167A33" FontSize="21" HorizontalAlignment="Center" VerticalAlignment="Center" />
+   </Border>
+   <StackPanel><TextBlock Text="{Binding ConnectedTitle}" Style="{StaticResource ViewTitle}" />
+    <TextBlock Text="{Binding ConnectedDescription}" Foreground="#656565" TextWrapping="Wrap" />
+   </StackPanel>
+  </DockPanel>
+  <Border Style="{StaticResource InfoPanel}">
+   <Grid>
+    <Grid.ColumnDefinitions><ColumnDefinition Width="155" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+    <TextBlock Text="Renderer" Style="{StaticResource InfoLabel}" /><TextBlock Grid.Column="1" Text="{Binding RendererDisplay}" Style="{StaticResource InfoValue}" />
+    <TextBlock Grid.Row="1" Text="本机地址" Style="{StaticResource InfoLabel}" /><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding LocalAddress}" Style="{StaticResource InfoValue}" />
+    <TextBlock Grid.Row="2" Text="设备类型" Style="{StaticResource InfoLabel}" /><TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DeviceType}" Style="{StaticResource InfoValue}" />
+    <TextBlock Grid.Row="3" Text="连接状态" Style="{StaticResource InfoLabel}" /><TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding OnlineLabel}" Style="{StaticResource InfoValue}" Foreground="#167A33" />
+    <TextBlock Grid.Row="4" Text="Windows DLNA Bridge" Style="{StaticResource InfoLabel}" />
+    <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+     <TextBlock Text="{Binding BridgeStatus}" Foreground="#656565" VerticalAlignment="Center" />
+     <Border Background="#EBEBEE" CornerRadius="4" Padding="7,3" Margin="10,0,0,0"><TextBlock Text="{Binding BridgeHint}" Foreground="#777777" FontSize="11" /></Border>
+    </StackPanel>
+   </Grid>
+  </Border>
+  <Expander Header="查看连接详情" Foreground="#656565" Margin="0,0,0,18">
+   <StackPanel Margin="0,10,0,0">
+    <TextBox Text="{Binding ConnectionDetails, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas" FontSize="12" MaxHeight="180"
+     Background="#F9F9FB" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+    <Button Content="{Binding ToggleTokenLabel}" Command="{Binding ToggleTokenCommand}" Style="{StaticResource TextButton}" HorizontalAlignment="Left" />
+   </StackPanel>
+  </Expander>
+  <StackPanel Orientation="Horizontal">
+   <Button Content="断开连接" Command="{Binding DisconnectCommand}" />
+   <Button Content="重新连接" Command="{Binding ConnectCommand}" />
+   <Button Content="重新识别" Command="{Binding ResetCommand}" Style="{StaticResource TextButton}" />
+  </StackPanel>
+ </StackPanel>
+</UserControl>
