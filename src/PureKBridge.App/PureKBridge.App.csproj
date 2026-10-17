@@ -7,8 +7,10 @@
     <PlatformTarget>x64</PlatformTarget>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>ChunK Helper</AssemblyName>
-    <Product>ChunK Helper</Product>
-    <Title>ChunK Helper</Title>
+    <Product>纯K助手</Product>
+    <Title>纯K助手</Title>
+    <Version>0.1.0</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <RootNamespace>PureKBridge.App</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
@@ -16,8 +18,8 @@
     <PackageReference Include="ZXing.Net" Version="0.16.11" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="..\..\THIRD_PARTY_NOTICES.md" Link="THIRD_PARTY_NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="..\..\licenses\Apache-2.0.txt" Link="licenses\Apache-2.0.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <EmbeddedResource Include="..\..\LICENSE" LogicalName="ChunK.Notices.LICENSE" />
+    <EmbeddedResource Include="..\..\licenses\Apache-2.0.txt" LogicalName="ChunK.Notices.Apache-2.0.txt" />
+    <EmbeddedResource Include="..\..\licenses\runtime\*.txt" LogicalName="ChunK.Notices.%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

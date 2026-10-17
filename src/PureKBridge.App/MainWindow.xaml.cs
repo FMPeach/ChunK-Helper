@@ -9,6 +9,7 @@ public partial class MainWindow : Window
     private readonly MainViewModel _model;
     private bool _canClose;
 
+    private void OpenAbout(object sender, RoutedEventArgs e) => new AboutWindow { Owner = this }.ShowDialog();
 
     public MainWindow(MainViewModel model)
     {

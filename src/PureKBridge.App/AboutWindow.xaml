@@ -1,0 +1,14 @@
+<Window x:Class="PureKBridge.App.AboutWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="关于纯K助手" Width="440" Height="260" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+ <StackPanel Margin="26">
+  <TextBlock Text="纯K助手" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,22" />
+  <Grid Margin="0,0,0,16">
+   <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+   <TextBlock Text="版本" />
+   <TextBlock Grid.Column="1" Text="{Binding}" HorizontalAlignment="Right" />
+  </Grid>
+  <Button Content="第三方许可证" HorizontalContentAlignment="Left" Click="OpenLicenses" Margin="0" />
+ </StackPanel>
+</Window>

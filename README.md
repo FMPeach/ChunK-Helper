@@ -1,6 +1,8 @@
-# ChunK Helper
+# 纯K助手 / ChunK Helper
 
 面向 Windows 的纯 K 房间投屏连接助手。扫描房间二维码、完成官方授权后，将当前房台发布为可发现的 DLNA 设备，方便在 Kirakara 等投屏应用中连接。
+
+**使用前注意：**本程序目前**只成功测试过一家纯K门店**，其它门店可能无法如期正常使用。如有关于纯K其它门店无法使用的问题，请提交issue。
 
 ## 功能特性
 
@@ -47,7 +49,7 @@ dotnet run --project src/PureKBridge.App -c Debug -p:Platform=x64
 .\tools\publish-windows.ps1
 ```
 
-默认输出到 `artifacts/ChunKHelper-win-x64/`，包含助手、运行时和第三方声明。需要独立单文件时可加 `-SingleFile`；与 Kirakara 联动时，将 App 本机配置中的 `windows.chunkHelperDirectory` 指向这个发布目录即可，不需要改动助手的开发方式。
+默认输出到 `artifacts/PureKHelper-win-x64/`，包含助手与运行时；版本和许可证在程序的“关于”中查看。需要独立单文件时可加 `-SingleFile`；与 Kirakara 联动时，将 App 本机配置中的 `windows.chunkHelperDirectory` 指向这个发布目录即可。
 
 运行回归检查：
 

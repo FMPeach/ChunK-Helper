@@ -115,7 +115,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public bool IsBusy => _busy;
     public bool IsConnecting => State == ConnectionState.Connecting;
     public bool CanChooseCamera => !_cameraRunning && !_busy;
-    public string AppTitle => "ChunK Helper";
+    public string AppTitle => "纯K助手";
     public string CameraButtonLabel => _cameraRunning ? "停止扫描" : "使用摄像头扫描";
     public string ScanTip => _cameraRunning ? "将房间二维码置于画面中，识别后会自动停止" : "将房间点歌屏上的二维码置于框内";
     public string RoomName => _room?.RoomName ?? "尚未识别";

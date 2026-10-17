@@ -86,6 +86,13 @@ internal static class Program
 
     private static async Task RunAsync()
     {
+        Check(AboutInfo.Version == System.Diagnostics.FileVersionInfo.GetVersionInfo(typeof(AboutInfo).Assembly.Location).ProductVersion,
+            "关于版本来自程序集打包版本");
+        Check(AboutInfo.Licenses.Count == 4 && AboutInfo.Licenses[1].Text.Contains("TERMS AND CONDITIONS") &&
+            AboutInfo.Licenses[2].Text.Contains("License notice for"), "第三方许可正文内嵌且离线可读");
+        var about = new PureKBridge.App.AboutWindow();
+        Check(about.Title == "关于纯K助手" && Equals(about.DataContext, AboutInfo.Version), "简洁关于窗口与实际版本绑定");
+        about.Close();
         Directory.CreateDirectory(Artifacts);
         var raw = Qr();
         var room = Parser.Parse(raw);
