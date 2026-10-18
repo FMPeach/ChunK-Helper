@@ -11,7 +11,7 @@ public sealed class PureKQrParser : IPureKQrParser
             !Uri.TryCreate(raw.Trim(), UriKind.Absolute, out var outer) ||
             !IsWebUrl(outer) || !outer.Host.Equals("wx.chunk.cn", StringComparison.OrdinalIgnoreCase) ||
             !outer.AbsolutePath.TrimEnd('/').Equals("/projection/login", StringComparison.OrdinalIgnoreCase))
-            throw new FormatException("二维码不是支持的 Pure K 投屏二维码。");
+            throw new FormatException("二维码不是支持的纯K投屏二维码。");
 
         try
         {

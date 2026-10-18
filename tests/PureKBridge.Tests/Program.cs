@@ -208,6 +208,7 @@ internal static class Program
         var logText = await File.ReadAllTextAsync(log.Path);
         Check(!logText.Contains("super-secret-token") && !logText.Contains("hidden-payload") && !logText.Contains("private-bill"), "日志敏感 query 遮蔽");
         await ProtocolTests.RunAsync(Check);
+        await TrayWindowTests.RunAsync(Artifacts, Check);
         Console.WriteLine($"\n{_passed} checks passed. Test QR: {Path.Combine(Artifacts, "room.png")}");
     }
 
