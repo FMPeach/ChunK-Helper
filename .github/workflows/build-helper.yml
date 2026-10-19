@@ -1,0 +1,35 @@
+name: 纯K助手构建测试
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [Actions-Test]
+    paths: [config/actions-build.json]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chunk-helper-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: 发布独立助手
+        shell: powershell
+        run: .\tools\build-actions-artifact.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chunk-helper-windows-x64
+          path: artifacts/actions-test/artifact/
+          if-no-files-found: error
+          retention-days: 7

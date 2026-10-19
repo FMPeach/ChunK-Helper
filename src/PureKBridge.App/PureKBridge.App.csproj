@@ -28,9 +28,9 @@
     </PropertyGroup>
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\..\tools\generate-package-metadata.ps1&quot; -OutputDirectory &quot;$(_KirakaraMetadata)&quot; -VersionOverride &quot;$(KirakaraPackageVersion)&quot;" />
     <PropertyGroup>
-      <Version>$([System.IO.File]::ReadAllText('$(_KirakaraMetadata)\version.txt'))</Version>
-      <InformationalVersion>$(Version)</InformationalVersion>
+      <InformationalVersion>$([System.IO.File]::ReadAllText('$(_KirakaraMetadata)\version.txt'))</InformationalVersion>
       <FileVersion>$([System.IO.File]::ReadAllText('$(_KirakaraMetadata)\fileVersion.txt'))</FileVersion>
+      <Version>$(FileVersion)</Version>
       <Product>$([System.IO.File]::ReadAllText('$(_KirakaraMetadata)\name.txt'))</Product>
       <Title>$(Product)</Title>
       <Company>$([System.IO.File]::ReadAllText('$(_KirakaraMetadata)\developer.txt'))</Company>

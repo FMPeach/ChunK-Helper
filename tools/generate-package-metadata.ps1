@@ -11,7 +11,7 @@ foreach ($field in @('name','version','developer')) {
     }
 }
 if (-not [string]::IsNullOrWhiteSpace($VersionOverride)) { $config.version = $VersionOverride }
-if ($config.version -notmatch '^(\d+)\.(\d+)\.(\d+)(?:-[0-9A-Za-z.-]+)?(?:\+(\d+))?$') { throw 'Invalid package version.' }
+if ($config.version -notmatch '^[vV]?(\d+)\.(\d+)\.(\d+)(?:-[0-9A-Za-z.-]+)?(?:\+(\d+))?$') { throw 'Invalid package version; use major.minor.patch, optionally prefixed with v.' }
 $numbers=@([int]$Matches[1],[int]$Matches[2],[int]$Matches[3],0)
 if ($Matches.ContainsKey(4)) { $numbers[3]=[int]$Matches[4] }
 if (@($numbers | Where-Object {$_ -gt 65535}).Count) { throw 'Windows version components cannot exceed 65535.' }
