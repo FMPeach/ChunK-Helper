@@ -3,7 +3,7 @@ name: 纯K助手构建测试
 on:
   workflow_dispatch:
   push:
-    branches: [Actions-Test]
+    branches: [main, Actions-Test]
     paths: [config/actions-build.json]
 
 permissions:
