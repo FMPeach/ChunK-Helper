@@ -2,7 +2,7 @@
  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
  <StackPanel>
   <TextBlock Text="2. 完成微信授权" Style="{StaticResource ViewTitle}" />
-  <TextBlock Text="如需官方授权，请复制下方链接，发送到电脑微信聊天窗口（例如“文件传输助手”），并在微信内置浏览器中打开。已授权的设备可直接确认继续，本程序不检查微信登录状态。" Style="{StaticResource Description}" />
+  <TextBlock Text="在电脑微信中打开下方链接，按页面提示完成授权。已授权的设备可直接继续。" Style="{StaticResource Description}" />
   <Border Style="{StaticResource InfoPanel}">
    <StackPanel>
     <TextBlock Text="官方投屏授权链接" FontWeight="SemiBold" Margin="0,0,0,12" />

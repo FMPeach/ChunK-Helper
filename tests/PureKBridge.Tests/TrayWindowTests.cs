@@ -95,6 +95,15 @@ internal static class TrayWindowTests
             await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             var checkbox = Descendants<CheckBox>(window).Single(box => Equals(box.Content, "点击关闭后隐藏到托盘"));
             check(checkbox.IsChecked == true, "右下角关闭隐藏开关绑定到已保存偏好");
+            check(Descendants<TextBlock>(window).Any(text => text.IsVisible &&
+                text.Text == "请仅连接您有权使用的房间投屏设备。"), "左下角显示简洁的房间使用权限提醒");
+            foreach (var width in new[] { 640, 760 })
+            {
+                window.Width = width;
+                window.UpdateLayout();
+                await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+                SaveWindowPreview(window, Path.Combine(folder, $"footer-{width}.png"));
+            }
             await model.AcceptQrAsync(ProtocolTests.Qr(server.BaseUrl));
             model.NextCommand.Execute(null);
             model.ConfirmWechat();

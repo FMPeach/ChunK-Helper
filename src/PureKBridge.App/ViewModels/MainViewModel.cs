@@ -129,12 +129,12 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public string CopyLabel => _copyLabel;
     private IPureKConnectionService ActiveConnection => _debugSimulation ? _demoConnection : _connection;
     public bool IsSimulation => ActiveConnection.IsSimulation;
-    public string ModeCaption => IsSimulation ? "演示模式 · 不会登记房台或广播设备" : "仅发布当前房间；投屏控制仍直连房台";
-    public string ConnectionIntroduction => IsSimulation ? "确认房间和本机地址，然后演示连接。不会向房台提交设备登记。" : "确认房间和本机地址。连接后，可回到投屏应用刷新设备列表。";
+    public string ModeCaption => (IsSimulation ? "演示模式 · " : "") + "请仅连接您有权使用的房间投屏设备。";
+    public string ConnectionIntroduction => IsSimulation ? "确认房间和本机地址，体验连接流程。" : "确认房间和本机地址。连接后，可回到投屏应用刷新设备列表。";
     public string BridgeStatus => _bridgePublished ? "已发布" : "尚未启用";
     public string BridgeHint => IsSimulation ? "演示连接" : "标准设备公告";
     public string ConnectedTitle => IsSimulation ? $"已完成 {RoomName} 的演示连接" : $"已连接到 {RoomName}";
-    public string ConnectedDescription => IsSimulation ? "四步流程已完成，当前尚未向房台登记此电脑。" : "房台登记与设备公告已启动，可回到投屏应用刷新设备列表。";
+    public string ConnectedDescription => IsSimulation ? "演示流程已完成，可重新识别房间。" : "可回到投屏应用刷新设备列表，选择当前房间。";
     public string OnlineLabel => _connected ? IsSimulation ? "演示在线" : "在线" : "未连接";
     public string DeviceType => _probe?.IsMediaRenderer == true ? "MediaRenderer" : "尚未确认";
     public string? ErrorMessage => _error;
