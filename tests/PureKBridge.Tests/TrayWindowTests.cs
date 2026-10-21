@@ -69,9 +69,10 @@ internal static class TrayWindowTests
         using (var nativeTray = new SystemTrayIcon())
         {
             nativeTray.Show();
+            nativeTray.ShowBackgroundNotification();
             await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         }
-        check(true, "原生系统托盘图标可创建并正常释放");
+        check(true, "原生系统托盘图标及气球通知接口可调用并正常释放");
 
         await using var server = new FakeRenderer();
         var routes = new Routes();
@@ -93,7 +94,7 @@ internal static class TrayWindowTests
         {
             window.Show();
             await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
-            var checkbox = Descendants<CheckBox>(window).Single(box => Equals(box.Content, "点击关闭后隐藏到托盘"));
+            var checkbox = Descendants<CheckBox>(window).Single(box => Equals(box.Content, "关闭或最小化时隐藏到托盘"));
             check(checkbox.IsChecked == true, "右下角关闭隐藏开关绑定到已保存偏好");
             check(Descendants<TextBlock>(window).Any(text => text.IsVisible &&
                 text.Text == "请仅连接您有权使用的房间投屏设备。"), "左下角显示简洁的房间使用权限提醒");
@@ -138,6 +139,7 @@ internal static class TrayWindowTests
             check(!window.IsVisible && tray.Shows == 1 && model.State == ConnectionState.Connected && bridge.IsRunning &&
                 monitor.Stops == stops && RevokeCount(server) == revokes,
                 "自动隐藏只收起窗口，不停止探活、公告或撤销登记");
+            check(tray.Notifications == 1, "连接后自动进入托盘会发送后台运行通知");
             check(await SingleInstanceTests.ActivateAsync(instanceName) && window.IsVisible &&
                 model.State == ConnectionState.Connected && bridge.IsRunning &&
                 monitor.Stops == stops && RevokeCount(server) == revokes,
@@ -148,14 +150,25 @@ internal static class TrayWindowTests
             check(!closed && !window.IsVisible && model.State == ConnectionState.Connected && bridge.IsRunning &&
                 monitor.Stops == stops && RevokeCount(server) == revokes,
                 "点击窗口关闭只进入托盘，保持房台连接");
-            tray.RequestShow();
+            check(tray.Notifications == 2, "每次从前台进入托盘都会重新通知");
+            window.Close();
+            check(tray.Notifications == 2, "窗口已在托盘时重复关闭不再通知");
+            tray.RequestNotificationClick();
+            check(window.IsVisible && !window.TrayBehavior.IsAutoHidePending &&
+                tray.Notifications == 2 && model.State == ConnectionState.Connected,
+                "点击后台通知恢复原窗口，保持连接且不会触发新通知");
             window.WindowState = WindowState.Minimized;
+            check(!window.IsVisible && tray.Notifications == 3 && model.State == ConnectionState.Connected,
+                "开关开启时最小化进入托盘并发送通知");
             check(await SingleInstanceTests.ActivateAsync(instanceName) && window.IsVisible &&
                 window.WindowState == WindowState.Normal, "重复启动可恢复最小化窗口");
             window.WindowState = WindowState.Minimized;
             tray.RequestShow();
             check(window.IsVisible && window.WindowState == WindowState.Normal, "托盘显示也能恢复最小化窗口");
+            tray.FailNotification = true;
             window.Close();
+            check(!window.IsVisible && model.State == ConnectionState.Connected && bridge.IsRunning,
+                "通知发送失败仍留在托盘，不影响房台连接");
             tray.RequestExit();
             var exit = window.ExitAsync();
             check(ReferenceEquals(exit, window.ExitAsync()), "重复退出请求共用一次清理任务");
@@ -170,19 +183,34 @@ internal static class TrayWindowTests
         var otherModel = new MainViewModel(log, images, new CameraService(images, log), otherClient, routes,
             otherConnection, new TestMonitor(), new TestBridge());
         var otherTray = new TestTray();
-        var otherWindow = new MainWindow(otherModel, otherTray, settings, initializeCamera: false);
+        var otherClock = new TestClock();
+        var otherWindow = new MainWindow(otherModel, otherTray, settings, otherClock, initializeCamera: false);
         var otherClosed = false;
         otherWindow.Closed += (_, _) => otherClosed = true;
         try
         {
             otherWindow.Show();
             await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
-            var checkbox = Descendants<CheckBox>(otherWindow).Single(box => Equals(box.Content, "点击关闭后隐藏到托盘"));
+            var checkbox = Descendants<CheckBox>(otherWindow).Single(box => Equals(box.Content, "关闭或最小化时隐藏到托盘"));
             checkbox.IsChecked = false;
             check(!otherWindow.TrayBehavior.CloseToTray && !settings.LoadCloseToTray(), "取消勾选会同步保存关闭行为");
+            otherWindow.WindowState = WindowState.Minimized;
+            check(otherWindow.IsVisible && otherTray.Shows == 0 && otherTray.Notifications == 0,
+                "关闭开关后普通最小化留在任务栏，不进入托盘或发送通知");
+            otherWindow.WindowState = WindowState.Normal;
+            await otherModel.AcceptQrAsync(ProtocolTests.Qr(server.BaseUrl));
+            otherModel.NextCommand.Execute(null);
+            otherModel.ConfirmWechat();
+            await otherModel.ConnectAsync();
+            otherClock.Advance(3);
+            otherWindow.TrayBehavior.AdvanceCountdown();
+            check(!otherWindow.IsVisible && otherTray.Shows == 1 && otherTray.Notifications == 0,
+                "关闭开关后保留连接成功自动收起行为，但不发送后台通知");
+            otherTray.RequestShow();
             otherWindow.Close();
             await otherWindow.ExitAsync().WaitAsync(TimeSpan.FromSeconds(5));
-            check(otherClosed && otherTray.Disposed && otherTray.Shows == 0, "取消勾选后窗口关闭直接退出而非隐藏");
+            check(otherClosed && otherTray.Disposed && otherTray.Shows == 1 && otherTray.Notifications == 0,
+                "取消勾选后窗口关闭直接退出而非隐藏或发送通知");
         }
         finally { await otherWindow.ExitAsync(); }
     }
@@ -222,11 +250,19 @@ internal static class TrayWindowTests
     private sealed class TestTray : ISystemTrayIcon
     {
         public int Shows;
+        public int Notifications;
+        public bool FailNotification;
         public bool Disposed;
         public event Action? ShowRequested;
         public event Action? ExitRequested;
         public void Show() => Shows++;
+        public void ShowBackgroundNotification()
+        {
+            if (FailNotification) throw new InvalidOperationException("测试通知失败");
+            Notifications++;
+        }
         public void RequestShow() => ShowRequested?.Invoke();
+        public void RequestNotificationClick() => ShowRequested?.Invoke();
         public void RequestExit() => ExitRequested?.Invoke();
         public void Dispose() => Disposed = true;
     }

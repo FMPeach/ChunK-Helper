@@ -46,6 +46,7 @@ public partial class MainWindow : Window
         _tray.ShowRequested += ShowFromTray;
         _tray.ExitRequested += OnTrayExit;
         Closing += OnClosing;
+        StateChanged += OnWindowStateChanged;
         Closed += (_, _) =>
         {
             _model.PropertyChanged -= OnModelChanged;
@@ -53,6 +54,7 @@ public partial class MainWindow : Window
             TrayBehavior.Dispose();
             _tray.ShowRequested -= ShowFromTray;
             _tray.ExitRequested -= OnTrayExit;
+            StateChanged -= OnWindowStateChanged;
             _tray.Dispose();
         };
     }
@@ -65,11 +67,21 @@ public partial class MainWindow : Window
 
     private void HideToTray()
     {
-        if (_exiting) return;
+        if (_exiting || !IsVisible) return;
         try { _tray.Show(); }
         catch (Exception error) { _model.ReportError(error); return; }
         TrayBehavior.CancelAutoHide();
         Hide();
+        if (TrayBehavior.CloseToTray)
+        {
+            try { _tray.ShowBackgroundNotification(); }
+            catch (Exception error) { new AppLog().Write("无法显示后台运行通知", error); }
+        }
+    }
+
+    private void OnWindowStateChanged(object? sender, EventArgs args)
+    {
+        if (WindowState == WindowState.Minimized && TrayBehavior.CloseToTray) HideToTray();
     }
 
     private void ShowFromTray() => RestoreFromExternalLaunch();
@@ -78,8 +90,8 @@ public partial class MainWindow : Window
     {
         if (_exiting) return;
         TrayBehavior.CancelAutoHide();
-        Show();
         if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+        Show();
         var target = OwnedWindows.Cast<Window>().LastOrDefault(window => window.IsVisible) ?? this;
         target.Activate();
         SetForegroundWindow(new WindowInteropHelper(target).Handle);

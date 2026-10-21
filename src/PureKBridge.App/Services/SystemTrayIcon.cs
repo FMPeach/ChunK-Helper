@@ -10,6 +10,7 @@ internal interface ISystemTrayIcon : IDisposable
     event Action? ShowRequested;
     event Action? ExitRequested;
     void Show();
+    void ShowBackgroundNotification();
 }
 
 internal sealed class SystemTrayIcon : ISystemTrayIcon
@@ -39,9 +40,14 @@ internal sealed class SystemTrayIcon : ISystemTrayIcon
             if (args.Button == Forms.MouseButtons.Left)
                 _dispatcher.InvokeAsync(() => ShowRequested?.Invoke());
         };
+        _notifyIcon.BalloonTipClicked += (_, _) =>
+            _dispatcher.InvokeAsync(() => ShowRequested?.Invoke());
     }
 
     public void Show() => _notifyIcon.Visible = true;
+
+    public void ShowBackgroundNotification() => _notifyIcon.ShowBalloonTip(5000, AboutInfo.Name,
+        "已在后台运行。点击此通知，或双击系统托盘图标返回窗口。", Forms.ToolTipIcon.Info);
 
     public void Dispose()
     {

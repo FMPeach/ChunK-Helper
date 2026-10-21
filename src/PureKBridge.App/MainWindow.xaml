@@ -84,7 +84,7 @@
     </TextBlock>
    </Grid>
    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-    <CheckBox Content="点击关闭后隐藏到托盘" FontSize="11" VerticalAlignment="Center"
+    <CheckBox Content="关闭或最小化时隐藏到托盘" FontSize="11" VerticalAlignment="Center"
      IsChecked="{Binding TrayBehavior.CloseToTray, ElementName=Root, Mode=TwoWay}" />
     <Button Content="关于" Style="{StaticResource TextButton}" Click="OpenAbout" Margin="8,0,0,0" />
    </StackPanel>
