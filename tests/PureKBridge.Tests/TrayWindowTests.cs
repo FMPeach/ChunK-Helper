@@ -84,6 +84,9 @@ internal static class TrayWindowTests
         var model = new MainViewModel(log, images, new CameraService(images, log), client, routes, connection, monitor, bridge);
         var tray = new TestTray();
         var window = new MainWindow(model, tray, settings, clock, initializeCamera: false);
+        var instanceName = "ChunK.Helper.TrayTest." + Guid.NewGuid().ToString("N");
+        using var instance = new SingleInstanceService(log, instanceName);
+        instance.ListenForActivation(() => window.Dispatcher.InvokeAsync(window.RestoreFromExternalLaunch).Task);
         var closed = false;
         window.Closed += (_, _) => closed = true;
         try
@@ -107,14 +110,11 @@ internal static class TrayWindowTests
                 window.Width = width;
                 window.UpdateLayout();
                 await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
-                var bitmap = new RenderTargetBitmap((int)Math.Ceiling(window.ActualWidth),
-                    (int)Math.Ceiling(window.ActualHeight), 96, 96, PixelFormats.Pbgra32);
-                bitmap.Render(window);
-                var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bitmap));
-                using var stream = File.Create(Path.Combine(folder, $"countdown-{width}.png"));
-                encoder.Save(stream);
+                SaveWindowPreview(window, Path.Combine(folder, $"countdown-{width}.png"));
             }
+            check(await SingleInstanceTests.ActivateAsync(instanceName) && window.IsVisible &&
+                !window.TrayBehavior.IsAutoHidePending,
+                "重复启动显示已有窗口并取消待执行的自动隐藏");
             cancel.Command!.Execute(null);
             clock.Advance(4);
             window.TrayBehavior.AdvanceCountdown();
@@ -129,6 +129,10 @@ internal static class TrayWindowTests
             check(!window.IsVisible && tray.Shows == 1 && model.State == ConnectionState.Connected && bridge.IsRunning &&
                 monitor.Stops == stops && RevokeCount(server) == revokes,
                 "自动隐藏只收起窗口，不停止探活、公告或撤销登记");
+            check(await SingleInstanceTests.ActivateAsync(instanceName) && window.IsVisible &&
+                model.State == ConnectionState.Connected && bridge.IsRunning &&
+                monitor.Stops == stops && RevokeCount(server) == revokes,
+                "重复启动可从托盘恢复原窗口，保持已有房台连接");
             tray.RequestShow();
             check(window.IsVisible && !window.TrayBehavior.IsAutoHidePending, "托盘显示恢复窗口且不重复自动隐藏");
             window.Close();
@@ -136,6 +140,9 @@ internal static class TrayWindowTests
                 monitor.Stops == stops && RevokeCount(server) == revokes,
                 "点击窗口关闭只进入托盘，保持房台连接");
             tray.RequestShow();
+            window.WindowState = WindowState.Minimized;
+            check(await SingleInstanceTests.ActivateAsync(instanceName) && window.IsVisible &&
+                window.WindowState == WindowState.Normal, "重复启动可恢复最小化窗口");
             window.WindowState = WindowState.Minimized;
             tray.RequestShow();
             check(window.IsVisible && window.WindowState == WindowState.Normal, "托盘显示也能恢复最小化窗口");
@@ -173,6 +180,17 @@ internal static class TrayWindowTests
 
     private static int RevokeCount(FakeRenderer server) =>
         server.Requests.Count(request => request.Method == "POST" && request.Body.Contains("<Enable>0</Enable>"));
+
+    private static void SaveWindowPreview(Window window, string path)
+    {
+        var bitmap = new RenderTargetBitmap((int)Math.Ceiling(window.ActualWidth),
+            (int)Math.Ceiling(window.ActualHeight), 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(window);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using var stream = File.Create(path);
+        encoder.Save(stream);
+    }
 
     private static IEnumerable<T> Descendants<T>(DependencyObject parent) where T : DependencyObject
     {

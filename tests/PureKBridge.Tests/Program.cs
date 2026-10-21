@@ -36,6 +36,8 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        if (args.Length >= 2 && args[0] == "--single-instance-probe")
+            return SingleInstanceTests.RunProbe(args);
         if (args.Contains("--diagnose-native-host") || args.Contains("--probe-hosted-service") || args.Contains("--native-bridge-integration") || args.Contains("--serve-native-bridge")) NativeHostedDiagnostics.InitializeSecurity();
         var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         application.Dispatcher.BeginInvoke(async () =>
@@ -59,6 +61,7 @@ internal static class Program
                     await DiscoveryDiagnostics.RunAsync(Artifacts, args);
                 else if (args.Contains("--network-smoke") || args.Contains("--serve-fake"))
                     await NetworkSmoke.RunAsync(Artifacts, args.Contains("--serve-fake"), args);
+                else if (args.Contains("--single-instance-tests")) await SingleInstanceTests.RunAsync(Check);
                 else await RunAsync();
             }
             catch (Exception error) { Console.Error.WriteLine(error); Environment.ExitCode = 1; }
@@ -208,6 +211,7 @@ internal static class Program
         var logText = await File.ReadAllTextAsync(log.Path);
         Check(!logText.Contains("super-secret-token") && !logText.Contains("hidden-payload") && !logText.Contains("private-bill"), "日志敏感 query 遮蔽");
         await ProtocolTests.RunAsync(Check);
+        await SingleInstanceTests.RunAsync(Check);
         await TrayWindowTests.RunAsync(Artifacts, Check);
         Console.WriteLine($"\n{_passed} checks passed. Test QR: {Path.Combine(Artifacts, "room.png")}");
     }

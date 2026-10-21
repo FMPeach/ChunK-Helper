@@ -1,5 +1,7 @@
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using PureKBridge.App.Services;
 using PureKBridge.App.ViewModels;
 using PureKBridge.Core.Session;
@@ -70,13 +72,17 @@ public partial class MainWindow : Window
         Hide();
     }
 
-    private void ShowFromTray()
+    private void ShowFromTray() => RestoreFromExternalLaunch();
+
+    internal void RestoreFromExternalLaunch()
     {
         if (_exiting) return;
         TrayBehavior.CancelAutoHide();
         Show();
         if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
-        Activate();
+        var target = OwnedWindows.Cast<Window>().LastOrDefault(window => window.IsVisible) ?? this;
+        target.Activate();
+        SetForegroundWindow(new WindowInteropHelper(target).Handle);
     }
 
     private async void OnTrayExit() => await ExitAsync();
@@ -108,4 +114,8 @@ public partial class MainWindow : Window
             await Dispatcher.InvokeAsync(() => { _canClose = true; Close(); });
         }
     }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(IntPtr window);
 }
