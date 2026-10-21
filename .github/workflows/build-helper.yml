@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main, Actions-Test]
-    paths: [config/actions-build.json]
+    paths: [config/package.json, config/actions-build.json]
 
 permissions:
   contents: read
@@ -25,11 +25,12 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: 发布独立助手
+        id: package
         shell: powershell
         run: .\tools\build-actions-artifact.ps1
       - uses: actions/upload-artifact@v4
         with:
-          name: chunk-helper-windows-x64
+          name: ${{ steps.package.outputs.artifact_name }}
           path: artifacts/actions-test/artifact/
           if-no-files-found: error
           retention-days: 7

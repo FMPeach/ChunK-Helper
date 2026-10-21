@@ -57,6 +57,8 @@ dotnet run --project src/PureKBridge.App -c Debug -p:Platform=x64
 应用名称、版本和开发者统一在 [`config/package.json`](config/package.json) 中修改，直接
 `dotnet run` 和发布都会读取这份配置。临时发布其他版本可用 `-Version '0.2.0'`。
 
+将 `config/package.json` 的修改推送到 main 后，GitHub Actions 会自动构建助手。也可以手动启动工作流，详见 [Actions 构建](docs/Actions构建.md)。
+
 默认输出到 `artifacts/PureKHelper-win-x64/`，包含助手与运行时；版本和许可证在程序的“关于”中查看。需要独立单文件时可加 `-SingleFile`；与 Kirakara 联动时，将 App 本机配置中的 `windows.chunkHelperDirectory` 指向这个发布目录即可。
 
 运行回归检查：

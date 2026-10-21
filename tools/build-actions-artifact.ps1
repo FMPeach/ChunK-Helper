@@ -32,4 +32,12 @@ $manifest = [ordered]@{
 }
 [IO.File]::WriteAllText((Join-Path $OutputDirectory 'component-manifest.json'),
   ($manifest | ConvertTo-Json -Depth 8) + "`n", [Text.UTF8Encoding]::new($false))
+$package = Get-Content -LiteralPath (Join-Path $root 'config/package.json') -Raw -Encoding utf8 | ConvertFrom-Json
+$name = $package.name -replace '[^\p{L}\p{N}._-]', '-'
+$version = $package.version -replace '[^\p{L}\p{N}._+-]', '-'
+$artifactName = $name + '-' + $version + '-windows-x64'
+if ($env:GITHUB_OUTPUT) {
+  [IO.File]::AppendAllText($env:GITHUB_OUTPUT, "artifact_name=$artifactName`n", [Text.UTF8Encoding]::new($false))
+}
+Write-Host "Helper download: $artifactName.zip"
 Write-Host "Helper artifact: $OutputDirectory"
