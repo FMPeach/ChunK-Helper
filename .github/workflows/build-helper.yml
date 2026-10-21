@@ -1,4 +1,4 @@
-name: 纯K助手构建测试
+name: 构建纯K助手
 
 on:
   workflow_dispatch:
