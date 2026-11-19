@@ -169,12 +169,19 @@ internal static class TrayWindowTests
             window.Close();
             check(!window.IsVisible && model.State == ConnectionState.Connected && bridge.IsRunning,
                 "通知发送失败仍留在托盘，不影响房台连接");
+            monitor.Offline();
+            await WaitUntilAsync(() => window.IsVisible && model.State == ConnectionState.Disconnected && !model.IsBusy);
+            check(window.WindowState == WindowState.Normal && !window.TrayBehavior.IsAutoHidePending && model.HasError,
+                "后台连接因网络异常断开时恢复并前置窗口，显示可重连状态");
+            var stoppedAfterLoss = monitor.Stops;
+            var revokesAfterLoss = RevokeCount(server);
             tray.RequestExit();
             var exit = window.ExitAsync();
             check(ReferenceEquals(exit, window.ExitAsync()), "重复退出请求共用一次清理任务");
             await exit.WaitAsync(TimeSpan.FromSeconds(5));
-            check(closed && tray.Disposed && !bridge.IsRunning && monitor.Stops == stops + 1 && RevokeCount(server) == revokes + 1,
-                "托盘关闭真正退出且只撤销一次登记、停止公告并释放图标");
+            check(closed && tray.Disposed && !bridge.IsRunning && monitor.Stops == stoppedAfterLoss + 1 &&
+                RevokeCount(server) == revokesAfterLoss,
+                "异常断连后从窗口退出会释放图标且不会重复撤销登记");
         }
         finally { await window.ExitAsync(); }
 
@@ -217,6 +224,12 @@ internal static class TrayWindowTests
 
     private static int RevokeCount(FakeRenderer server) =>
         server.Requests.Count(request => request.Method == "POST" && request.Body.Contains("<Enable>0</Enable>"));
+
+    private static async Task WaitUntilAsync(Func<bool> predicate)
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(4));
+        while (!predicate()) await Task.Delay(10, timeout.Token);
+    }
 
     private static void SaveWindowPreview(Window window, string path)
     {
@@ -284,8 +297,9 @@ internal static class TrayWindowTests
     private sealed class TestMonitor : IRendererHealthMonitor
     {
         public int Stops;
-        public event Action<RendererHealth>? HealthChanged { add { } remove { } }
+        public event Action<RendererHealth>? HealthChanged;
         public Task StartAsync(KnownRenderer renderer, CancellationToken cancellationToken) => Task.CompletedTask;
         public Task StopAsync(CancellationToken cancellationToken = default) { Stops++; return Task.CompletedTask; }
+        public void Offline() => HealthChanged?.Invoke(RendererHealth.RendererOffline);
     }
 }

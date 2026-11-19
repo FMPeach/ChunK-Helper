@@ -68,6 +68,8 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     private int _previewQueued;
     private CameraDevice? _selectedCamera;
 
+    public event Action? ConnectionLost;
+
     public MainViewModel(AppLog log, QrImageReader images, CameraService camera,
         IRendererClient renderer, ILocalRouteResolver routes, IPureKConnectionService connection,
         IRendererHealthMonitor monitor, ISsdpBridge bridge)
@@ -500,6 +502,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
             _error = message;
             _rendererStatus = "Renderer 暂时无法访问";
             Update();
+            ConnectionLost?.Invoke();
         }
         catch (OperationCanceledException) { }
         catch (Exception error) { ReportError(error); }

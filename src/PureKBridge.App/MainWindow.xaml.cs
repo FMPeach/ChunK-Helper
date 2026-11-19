@@ -42,6 +42,7 @@ public partial class MainWindow : Window
         }
         Loaded += InitializeOnce;
         _model.PropertyChanged += OnModelChanged;
+        _model.ConnectionLost += OnConnectionLost;
         TrayBehavior.HideRequested += HideToTray;
         _tray.ShowRequested += ShowFromTray;
         _tray.ExitRequested += OnTrayExit;
@@ -50,6 +51,7 @@ public partial class MainWindow : Window
         Closed += (_, _) =>
         {
             _model.PropertyChanged -= OnModelChanged;
+            _model.ConnectionLost -= OnConnectionLost;
             TrayBehavior.HideRequested -= HideToTray;
             TrayBehavior.Dispose();
             _tray.ShowRequested -= ShowFromTray;
@@ -63,6 +65,17 @@ public partial class MainWindow : Window
     {
         if (!_exiting && (string.IsNullOrEmpty(args.PropertyName) || args.PropertyName == nameof(MainViewModel.State)))
             TrayBehavior.SetConnected(_model.State == ConnectionState.Connected);
+    }
+
+    private void OnConnectionLost()
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            _ = Dispatcher.BeginInvoke((Action)OnConnectionLost);
+            return;
+        }
+        if (_exiting || (IsVisible && WindowState != WindowState.Minimized)) return;
+        RestoreFromExternalLaunch();
     }
 
     private void HideToTray()

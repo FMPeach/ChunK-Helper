@@ -176,6 +176,8 @@ internal static class ProtocolTests
         var log = new AppLog(); var images = new QrImageReader();
         var bridge = new TestBridge(); var health = new TestMonitor();
         var vm = new MainViewModel(log, images, new CameraService(images, log), client, routes, connection, health, bridge);
+        var connectionLosses = 0;
+        vm.ConnectionLost += () => connectionLosses++;
 #if DEBUG
         check(vm.IsDebugBuild, "Debug 保留开发入口");
 #else
@@ -187,7 +189,8 @@ internal static class ProtocolTests
         check(vm.IsDonePage && vm.OnlineLabel == "在线" && vm.BridgeStatus == "已发布" && health.Starts == 1, "正式 UI 只在登记与发布成功后显示在线");
         bridge.Fail();
         await WaitUntilAsync(() => vm.State == ConnectionState.Disconnected && !vm.IsBusy);
-        check(vm.HasError && vm.BridgeStatus == "尚未启用" && !bridge.IsRunning && health.Stops > 0, "公告失败事件清理会话并回到可重连状态");
+        check(vm.HasError && vm.BridgeStatus == "尚未启用" && !bridge.IsRunning && health.Stops > 0 && connectionLosses == 1,
+            "公告失败事件清理会话、报告异常断连并回到可重连状态");
         bridge.StartFailure = true;
         try { await vm.ConnectAsync(); throw new Exception("bridge failure accepted"); }
         catch (IOException) { }
@@ -197,8 +200,12 @@ internal static class ProtocolTests
         await vm.ConnectAsync();
         health.Offline();
         await WaitUntilAsync(() => vm.State == ConnectionState.Disconnected && !vm.IsBusy);
-        check(!bridge.IsRunning && vm.HasError && server.Requests.Last(r => r.Method == "POST").Body.Contains("<Enable>0</Enable>"),
-            "确认离线联动停止公告并撤销登记");
+        check(!bridge.IsRunning && vm.HasError && connectionLosses == 2 &&
+            server.Requests.Last(r => r.Method == "POST").Body.Contains("<Enable>0</Enable>"),
+            "确认离线联动停止公告、撤销登记并报告异常断连");
+        await vm.ConnectAsync();
+        await vm.DisconnectAsync();
+        check(connectionLosses == 2, "用户主动断开不会报告异常断连或唤醒窗口");
         await vm.ConnectAsync();
         await vm.DisposeAsync();
         check(!bridge.IsRunning && server.Requests.Last(r => r.Method == "POST").Body.Contains("<Enable>0</Enable>"), "关闭 ViewModel 取消探活、停止公告并撤销登记");
